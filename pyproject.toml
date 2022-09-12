@@ -20,6 +20,9 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
+[project.optional-dependencies]
+dev = ["black", "bumpver", "mypy", "flake8"]
+
 [project.urls]
 repository = "https://github.com/wilswer/yapb"
 
@@ -29,3 +32,21 @@ build-backend = "maturin"
 
 [tool.maturin]
 python-source = "python"
+
+[tool.bumpver]
+current_version = "0.0.1"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message = "bump version {old_version} -> {new_version}"
+commit = true
+tag = true
+push = true
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'current_version = "{version}"',
+]
+"README.md" = [
+    "{version}",
+    "{pep440_version}",
+]
+
