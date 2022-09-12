@@ -14,4 +14,4 @@ for _ in range(N):
 
 ## Installation
 
-`pip install yapb`
+```pip install yapb```
