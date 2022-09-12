@@ -1,15 +1,31 @@
-[build-system]
-requires = ["maturin>=0.13,<0.14"]
-build-backend = "maturin"
-
 [project]
 name = "yapb"
+version = "0.0.1"
+description = "A Minimalist Progress Bar for Python"
+readme = "README.md"
 requires-python = ">=3.7"
+license = {file = "LICENSE"}
+keywords = ["progress", "bar", "progressbar", "progress-bar"]
+authors = [
+  {email = "wilhelm.wermelin@icloud.com"},
+  {name = "Wilhelm Söderkvist Vermelin"}
+]
+maintainers = [
+  {name = "Wilhelm Söderkvist Vermelin", email = "wilhelm.wermelin@icloud.com"}
+]
 classifiers = [
+    "Programming Language :: Python",
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
+
+[project.urls]
+repository = "https://github.com/wilswer/yapb"
+
+[build-system]
+requires = ["maturin>=0.13,<0.14"]
+build-backend = "maturin"
 
 [tool.maturin]
 python-source = "python"
