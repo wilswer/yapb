@@ -4,6 +4,7 @@
 
 ```python
 from yapb import ProgressBar
+
 N = 100
 pb = ProgressBar(N, message="Computing...", description="Progress")
 for _ in range(N):
