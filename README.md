@@ -1,4 +1,4 @@
-# YAPB: A Simplistic Progress Bar for Python
+# YAPB: A Minimalist Progress Bar for Python
 
 ## Usage
 
