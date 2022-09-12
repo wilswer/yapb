@@ -11,3 +11,7 @@ for _ in range(N):
     pb.update(message="Still computing...", description=f"At {_}/{N}")
     pb.render()
 ```
+
+## Installation
+
+`pip install yapb`
