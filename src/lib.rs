@@ -48,6 +48,9 @@ impl ProgressBar {
     }
 
     pub fn update(&mut self, message: Option<String>, description: Option<String>) {
+        if self.done {
+            return;
+        }
         self.current += 1;
         if self.current >= self.length {
             self.done = true;
