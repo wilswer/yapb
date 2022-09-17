@@ -23,13 +23,13 @@ fn format_bar_push(
     message: &str,
     bar: &str,
     current: usize,
-    length: usize,
+    capacity: usize,
     description: &str,
 ) -> String {
     let current_str = current.to_string();
-    let length_str = length.to_string();
+    let capacity_str = capacity.to_string();
     let mut out = String::with_capacity(
-        6 + message.len() + bar.len() + current_str.len() + length_str.len() + description.len(),
+        6 + message.len() + bar.len() + current_str.len() + capacity_str.len() + description.len(),
     );
     out.push_str(message);
     out.push(' ');
@@ -39,7 +39,7 @@ fn format_bar_push(
     out.push(' ');
     out.push_str(&current_str);
     out.push('/');
-    out.push_str(&length_str);
+    out.push_str(&capacity_str);
     out.push(' ');
     out.push_str(description);
     out
@@ -53,14 +53,14 @@ fn yapb(_py: Python, m: &PyModule) -> PyResult<()> {
 
 #[pyclass]
 pub struct ProgressBar {
-    length: usize,
+    capacity: usize,
     current: usize,
     message: String,
     description: String,
     character: char,
     head: char,
     done: bool,
-    max_length: usize,
+    ncols: usize,
     bar: String,
 }
 
@@ -68,21 +68,21 @@ pub struct ProgressBar {
 impl ProgressBar {
     #[new]
     pub fn new(
-        length: usize,
+        capacity: usize,
         message: Option<String>,
         description: Option<String>,
-        max_length: Option<usize>,
+        ncols: Option<usize>,
     ) -> ProgressBar {
         ProgressBar {
-            length,
+            capacity,
             current: 0,
             message: message.unwrap_or("".to_string()),
             description: description.unwrap_or("".to_string()),
             character: '=',
             head: '>',
             done: false,
-            max_length: max_length.unwrap_or(50),
-            bar: ' '.to_string().repeat(max_length.unwrap_or(50)),
+            ncols: ncols.unwrap_or(50),
+            bar: ' '.to_string().repeat(ncols.unwrap_or(50)),
         }
     }
 
@@ -91,7 +91,7 @@ impl ProgressBar {
             return;
         }
         self.current += 1;
-        if self.current >= self.length {
+        if self.current >= self.capacity {
             self.done = true;
         }
         if message.is_some() {
@@ -104,15 +104,15 @@ impl ProgressBar {
 
     pub fn render(&mut self) {
         let effective_current =
-            ((self.current as f64 / self.length as f64) * (self.max_length as f64)) as usize;
-        if self.length > self.max_length {
+            ((self.current as f64 / self.capacity as f64) * (self.ncols as f64)) as usize;
+        if self.capacity > self.ncols {
             if !self.done {
                 if effective_current > 0 {
                     replace_nth_char_ascii(&mut self.bar, effective_current - 1, self.character);
                 }
                 replace_nth_char_ascii(&mut self.bar, effective_current, self.head);
             } else {
-                replace_nth_char_ascii(&mut self.bar, self.max_length - 1, self.character);
+                replace_nth_char_ascii(&mut self.bar, self.ncols - 1, self.character);
             }
         } else {
             if !self.done {
@@ -121,8 +121,8 @@ impl ProgressBar {
                 }
                 replace_nth_char_ascii(&mut self.bar, effective_current, self.head);
             } else {
-                replace_range_nth_char_ascii(&mut self.bar, self.max_length - 1, self.character);
-                replace_nth_char_ascii(&mut self.bar, self.max_length - 1, self.character);
+                replace_range_nth_char_ascii(&mut self.bar, self.ncols - 1, self.character);
+                replace_nth_char_ascii(&mut self.bar, self.ncols - 1, self.character);
             }
         }
         if !self.done {
@@ -132,7 +132,7 @@ impl ProgressBar {
                     &self.message,
                     &self.bar,
                     self.current,
-                    self.length,
+                    self.capacity,
                     &self.description
                 )
             );
@@ -144,7 +144,7 @@ impl ProgressBar {
                     &self.message,
                     &self.bar,
                     self.current,
-                    self.length,
+                    self.capacity,
                     &self.description
                 )
             );

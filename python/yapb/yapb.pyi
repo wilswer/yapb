@@ -12,15 +12,12 @@ class ProgressBar:
 
     def __init__(
         self,
-        length: int,
+        capacity: int,
         message: str = "",
         description: str = "",
-        max_length: Optional[int] = 88,
+        ncols: Optional[int] = 50,
     ) -> None:
         """Initialize the progress bar."""
-        ...
-    def get_length(self) -> int:
-        """Get the length of the progress bar."""
         ...
     def update(self, message: Optional[str], description: Optional[str]) -> None:
         """Update the progress bar."""
