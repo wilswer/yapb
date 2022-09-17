@@ -69,15 +69,15 @@ impl ProgressBar {
     #[new]
     pub fn new(
         length: usize,
-        message: String,
-        description: String,
+        message: Option<String>,
+        description: Option<String>,
         max_length: Option<usize>,
     ) -> ProgressBar {
         ProgressBar {
             length,
             current: 0,
-            message,
-            description,
+            message: message.unwrap_or("".to_string()),
+            description: description.unwrap_or("".to_string()),
             character: '=',
             head: '>',
             done: false,

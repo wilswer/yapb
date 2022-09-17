@@ -13,8 +13,8 @@ class ProgressBar:
     def __init__(
         self,
         length: int,
-        message: str,
-        description: str,
+        message: str = "",
+        description: str = "",
         max_length: Optional[int] = 88,
     ) -> None:
         """Initialize the progress bar."""
