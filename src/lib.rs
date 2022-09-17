@@ -1,18 +1,53 @@
 use pyo3::prelude::*;
-use std::io::Write;
+use std::io::{self, Write};
 
-macro_rules! progressbar_fmt_str {
-    () => {
-        "\r{} [{}] {}/{} {}"
-    };
+fn replace_nth_char_ascii(s: &mut str, idx: usize, newchar: char) {
+    let s_bytes: &mut [u8] = unsafe { s.as_bytes_mut() };
+    assert!(idx < s_bytes.len());
+    assert!(s_bytes[idx].is_ascii());
+    assert!(newchar.is_ascii());
+    // we've made sure this is safe.
+    s_bytes[idx] = newchar as u8;
+}
+fn replace_range_nth_char_ascii(s: &mut str, idx: usize, newchar: char) {
+    let s_bytes: &mut [u8] = unsafe { s.as_bytes_mut() };
+    assert!(idx < s_bytes.len());
+    assert!(newchar.is_ascii());
+    for i in 0..idx {
+        assert!(s_bytes[i].is_ascii());
+        s_bytes[i] = newchar as u8;
+    }
 }
 
-/// A Python module implemented in Rust.
+fn format_bar_push(
+    message: &str,
+    bar: &str,
+    current: usize,
+    length: usize,
+    description: &str,
+) -> String {
+    let current_str = current.to_string();
+    let length_str = length.to_string();
+    let mut out = String::with_capacity(
+        6 + message.len() + bar.len() + current_str.len() + length_str.len() + description.len(),
+    );
+    out.push_str(message);
+    out.push(' ');
+    out.push('[');
+    out.push_str(bar);
+    out.push(']');
+    out.push(' ');
+    out.push_str(&current_str);
+    out.push('/');
+    out.push_str(&length_str);
+    out.push(' ');
+    out.push_str(description);
+    out
+}
+
 #[pymodule]
 fn yapb(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<ProgressBar>()?;
-    m.add_class::<FastProgressBar>()?;
-    // m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
     Ok(())
 }
 
@@ -26,12 +61,18 @@ pub struct ProgressBar {
     head: char,
     done: bool,
     max_length: usize,
+    bar: String,
 }
 
 #[pymethods]
 impl ProgressBar {
     #[new]
-    pub fn new(length: usize, message: String, description: String) -> ProgressBar {
+    pub fn new(
+        length: usize,
+        message: String,
+        description: String,
+        max_length: Option<usize>,
+    ) -> ProgressBar {
         ProgressBar {
             length,
             current: 0,
@@ -40,12 +81,9 @@ impl ProgressBar {
             character: '=',
             head: '>',
             done: false,
-            max_length: 88,
+            max_length: max_length.unwrap_or(50),
+            bar: ' '.to_string().repeat(max_length.unwrap_or(50)),
         }
-    }
-
-    pub fn get_length(&self) -> usize {
-        self.length
     }
 
     pub fn update(&mut self, message: Option<String>, description: Option<String>) {
@@ -64,107 +102,51 @@ impl ProgressBar {
         }
     }
 
-    pub fn render(&self) {
-        let effective_current: usize =
+    pub fn render(&mut self) {
+        let effective_current =
             ((self.current as f64 / self.length as f64) * (self.max_length as f64)) as usize;
-        let mut bar = String::new();
-        if effective_current > 0 {
-            bar.push_str(&self.character.to_string().repeat(effective_current - 1));
-        }
-        if !self.done {
-            bar.push(self.head);
+        if self.length > self.max_length {
+            if !self.done {
+                if effective_current > 0 {
+                    replace_nth_char_ascii(&mut self.bar, effective_current - 1, self.character);
+                }
+                replace_nth_char_ascii(&mut self.bar, effective_current, self.head);
+            } else {
+                replace_nth_char_ascii(&mut self.bar, self.max_length - 1, self.character);
+            }
         } else {
-            bar.push(self.character);
+            if !self.done {
+                if effective_current > 0 {
+                    replace_range_nth_char_ascii(&mut self.bar, effective_current, self.character);
+                }
+                replace_nth_char_ascii(&mut self.bar, effective_current, self.head);
+            } else {
+                replace_range_nth_char_ascii(&mut self.bar, self.max_length - 1, self.character);
+                replace_nth_char_ascii(&mut self.bar, self.max_length - 1, self.character);
+            }
         }
-        bar.push_str(&' '.to_string().repeat(self.max_length - effective_current));
         if !self.done {
             print!(
-                "\r{} [{}] {}/{} {}",
-                self.message, bar, self.current, self.length, self.description
+                "\r{}",
+                format_bar_push(
+                    &self.message,
+                    &self.bar,
+                    self.current,
+                    self.length,
+                    &self.description
+                )
             );
+            io::stdout().flush().unwrap();
         } else {
             println!(
-                "\r{} [{}] {}/{} {}",
-                self.message, bar, self.current, self.length, self.description
-            );
-        }
-    }
-}
-
-#[pyclass]
-pub struct FastProgressBar {
-    length: usize,
-    current: usize,
-    message: String,
-    description: String,
-    character: char,
-    head: char,
-    done: bool,
-    max_length: usize,
-}
-
-#[pymethods]
-impl FastProgressBar {
-    #[new]
-    pub fn new(length: usize, message: String, description: String) -> FastProgressBar {
-        FastProgressBar {
-            length,
-            current: 0,
-            message,
-            description,
-            character: '=',
-            head: '>',
-            done: false,
-            max_length: 88,
-        }
-    }
-
-    pub fn get_length(&self) -> usize {
-        self.length
-    }
-
-    pub fn update(&mut self, message: Option<String>, description: Option<String>) {
-        if self.done {
-            return;
-        }
-        self.current += 1;
-        if self.current >= self.length {
-            self.done = true;
-        }
-        if message.is_some() {
-            self.message = message.unwrap();
-        }
-        if description.is_some() {
-            self.description = description.unwrap();
-        }
-    }
-
-    pub fn render(&self) {
-        let effective_current: usize =
-            ((self.current as f64 / self.length as f64) * (self.max_length as f64)) as usize;
-        let mut bar = String::new();
-        if effective_current > 0 {
-            bar.push_str(&self.character.to_string().repeat(effective_current - 1));
-        }
-        if !self.done {
-            bar.push(self.head);
-        } else {
-            bar.push(self.character);
-        }
-        bar.push_str(&' '.to_string().repeat(self.max_length - effective_current));
-        if !self.done {
-            let bar_str = format!(
-                progressbar_fmt_str!(),
-                self.message, bar, self.current, self.length, self.description
-            );
-            let stdout = std::io::stdout();
-            let lock = stdout.lock();
-            let mut buf = std::io::BufWriter::with_capacity(8, lock);
-            let _ = buf.write(bar_str.as_bytes()).unwrap();
-        } else {
-            println!(
-                "\r{} [{}] {}/{} {}",
-                self.message, bar, self.current, self.length, self.description
+                "\r{}",
+                format_bar_push(
+                    &self.message,
+                    &self.bar,
+                    self.current,
+                    self.length,
+                    &self.description
+                )
             );
         }
     }

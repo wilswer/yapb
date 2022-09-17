@@ -10,7 +10,13 @@ class ProgressBar:
     done: bool
     max_length: int
 
-    def __init__(self, length: int, message: str, description: str) -> None:
+    def __init__(
+        self,
+        length: int,
+        message: str,
+        description: str,
+        max_length: Optional[int] = 88,
+    ) -> None:
         """Initialize the progress bar."""
         ...
     def get_length(self) -> int:

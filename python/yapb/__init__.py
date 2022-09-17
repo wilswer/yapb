@@ -1,1 +1,1 @@
-from .yapb import ProgressBar, FastProgressBar
+from .yapb import ProgressBar
