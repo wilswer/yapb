@@ -1,14 +1,7 @@
 from typing import Optional
 
 class ProgressBar:
-    length: int
-    current: int
-    message: str
-    description: str
-    character: str
-    head: str
-    done: bool
-    max_length: int
+    """Progress bar class."""
 
     def __init__(
         self,
