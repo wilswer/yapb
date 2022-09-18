@@ -1,4 +1,5 @@
 use pyo3::prelude::*;
+use pyo3::types::PyList;
 use pyo3::Python;
 use std::io::{self, Write};
 
@@ -7,30 +8,6 @@ fn yapb(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<ProgressBar>()?;
     Ok(())
 }
-//
-// #[pymodule]
-// fn yapb(_py: Python, m: &PyModule) -> PyResult<()> {
-//     m.add_wrapped(wrap_pymodule!(progress))?;
-//     Ok(())
-// }
-
-// #[pymodule]
-// fn yapb(py: Python<'_>, m: &PyModule) -> PyResult<()> {
-//     register_child_module(py, m)?;
-//     Ok(())
-// }
-//
-// fn register_child_module(py: Python<'_>, parent_module: &PyModule) -> PyResult<()> {
-//     let child_module = PyModule::new(py, "yapb.progress")?;
-//     child_module.add_class::<ProgressBar>()?;
-//     py_run!(
-//         py,
-//         child_module,
-//         "import sys; sys.modules['yapb.progress'] = child_module"
-//     );
-//     parent_module.add_submodule(child_module)?;
-//     Ok(())
-// }
 
 fn replace_nth_char_ascii(s: &mut str, idx: usize, newchar: char) {
     let s_bytes: &mut [u8] = unsafe { s.as_bytes_mut() };
@@ -87,6 +64,7 @@ pub struct ProgressBar {
     done: bool,
     ncols: usize,
     bar: String,
+    logs: Vec<(usize, String)>,
 }
 
 #[pymethods]
@@ -108,6 +86,7 @@ impl ProgressBar {
             done: false,
             ncols: ncols.unwrap_or(50),
             bar: ' '.to_string().repeat(ncols.unwrap_or(50)),
+            logs: Vec::new(),
         }
     }
 
@@ -175,6 +154,35 @@ impl ProgressBar {
             );
         }
     }
+
+    pub fn refresh(&mut self, message: Option<String>, description: Option<String>) {
+        let message = message.unwrap_or(self.message.clone());
+        let description = description.unwrap_or(self.description.clone());
+        self.update(Some(message), Some(description));
+        self.render();
+    }
+
+    pub fn log(&mut self, message: String) {
+        if self.logs.contains(&(self.current, message.clone())) {
+            return;
+        }
+        self.logs.push((self.current, message));
+    }
+
+    pub fn get_logs(&self) -> PyResult<Vec<PyObject>> {
+        if self.logs.len() == 0 {
+            return Ok(Vec::new());
+        }
+        Python::with_gil(|py| {
+            let py_logs = PyList::empty(py);
+            for log in self.logs.iter() {
+                py_logs
+                    .append((log.0, format!("{}", log.1.clone())))
+                    .unwrap();
+            }
+            Ok(py_logs.extract().unwrap())
+        })
+    }
 }
 
 impl ProgressBar {
@@ -198,5 +206,16 @@ impl ProgressBar {
     }
     pub fn get_bar(&self) -> &str {
         &self.bar
+    }
+    pub fn _get_logs(&self) -> &Vec<(usize, String)> {
+        &self.logs
+    }
+    pub fn reset(&mut self) {
+        self.current = 0;
+        self.done = false;
+        self.bar = ' '.to_string().repeat(self.ncols);
+        self.message = "".to_string();
+        self.description = "".to_string();
+        self.logs = Vec::new();
     }
 }

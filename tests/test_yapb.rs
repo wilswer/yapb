@@ -133,3 +133,95 @@ pub fn test_bar_low_capacity() {
         );
     }
 }
+
+#[test]
+pub fn test_log() {
+    let mut pb = ProgressBar::new(100, None, None, None);
+    assert!(pb._get_logs().is_empty());
+    pb.update(None, None);
+    pb.render();
+    assert!(pb._get_logs().is_empty());
+
+    pb.log("Hello".to_string());
+    assert_eq!(pb._get_logs().len(), 1);
+    assert_eq!(pb._get_logs()[0].0, 1);
+    assert_eq!(pb._get_logs()[0].1, "Hello".to_string());
+    pb.log("Hello".to_string());
+    assert_eq!(pb._get_logs().len(), 1);
+    assert_eq!(pb._get_logs()[0].0, 1);
+    assert_eq!(pb._get_logs()[0].1, "Hello".to_string());
+    pb.reset();
+    for i in 0..100 {
+        pb.log(i.to_string());
+        assert_eq!(pb._get_logs().len(), i + 1);
+        assert_eq!(pb._get_logs()[i].0, i);
+        assert_eq!(pb._get_logs()[i].1, i.to_string());
+        pb.update(None, None);
+    }
+}
+
+#[test]
+pub fn test_refresh() {
+    let mut pb = ProgressBar::new(100, None, None, None);
+    pb.update(None, None);
+    assert_eq!(pb.get_current(), 1);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 2);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 3);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 4);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 5);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 6);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 7);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 8);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 9);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 10);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 11);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 12);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 13);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 14);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 15);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 16);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 17);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 18);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 19);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 20);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 21);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 22);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 23);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 24);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 25);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 26);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 27);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 28);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 29);
+    pb.refresh(None, None);
+    assert_eq!(pb.get_current(), 30);
+    pb.refresh(None, None);
+}

@@ -1,3 +1,5 @@
+from typing import Tuple
+from typing import List
 from typing import Optional
 
 class ProgressBar:
@@ -17,4 +19,10 @@ class ProgressBar:
         ...
     def render(self) -> None:
         """Render the progress bar."""
+        ...
+    def log(self, message: Optional[str]) -> None:
+        """Log a message."""
+        ...
+    def get_logs(self) -> List[Tuple[int, str]]:
+        """Get the logs."""
         ...
