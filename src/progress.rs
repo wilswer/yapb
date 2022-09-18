@@ -163,8 +163,14 @@ impl ProgressBar {
     }
 
     pub fn log(&mut self, message: String) {
-        if self.logs.contains(&(self.current, message.clone())) {
+        if self.done {
             return;
+        }
+        if self.logs.len() > 0 {
+            let last = self.logs.last().unwrap();
+            if last == &(self.current, message.clone()) {
+                return;
+            }
         }
         self.logs.push((self.current, message));
     }
