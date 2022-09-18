@@ -76,21 +76,6 @@ fn format_bar_push(
     out
 }
 
-// pub fn nested_call() {
-//     let gil_guard = Python::acquire_gil();
-//     // let gil = GILGuard::acquire();
-//     let py = gil_guard.python();
-//     let yapb = wrap_pymodule!(yapb)(py);
-//     let ctx = [("yapb", yapb)].into_py_dict(py);
-//
-//     py.run(
-//         "assert yapb.progress.subfunction() == 'Subfunction'",
-//         None,
-//         Some(&ctx),
-//     )
-//     .unwrap();
-// }
-
 #[pyclass]
 pub struct ProgressBar {
     capacity: usize,
@@ -189,5 +174,29 @@ impl ProgressBar {
                 )
             );
         }
+    }
+}
+
+impl ProgressBar {
+    pub fn get_current(&self) -> usize {
+        self.current
+    }
+    pub fn get_capacity(&self) -> usize {
+        self.capacity
+    }
+    pub fn get_message(&self) -> &str {
+        &self.message
+    }
+    pub fn get_description(&self) -> &str {
+        &self.description
+    }
+    pub fn get_ncols(&self) -> usize {
+        self.ncols
+    }
+    pub fn is_done(&self) -> bool {
+        self.done
+    }
+    pub fn get_bar(&self) -> &str {
+        &self.bar
     }
 }

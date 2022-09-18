@@ -1,5 +1,7 @@
 # YAPB: A Minimalist Progress Bar for Python
 
+[example workflow](https://github.com/github/docs/actions/workflows/rust_tests.yml/badge.svg)
+
 ## Usage
 
 ```python
