@@ -7,30 +7,6 @@ fn yapb(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<ProgressBar>()?;
     Ok(())
 }
-//
-// #[pymodule]
-// fn yapb(_py: Python, m: &PyModule) -> PyResult<()> {
-//     m.add_wrapped(wrap_pymodule!(progress))?;
-//     Ok(())
-// }
-
-// #[pymodule]
-// fn yapb(py: Python<'_>, m: &PyModule) -> PyResult<()> {
-//     register_child_module(py, m)?;
-//     Ok(())
-// }
-//
-// fn register_child_module(py: Python<'_>, parent_module: &PyModule) -> PyResult<()> {
-//     let child_module = PyModule::new(py, "yapb.progress")?;
-//     child_module.add_class::<ProgressBar>()?;
-//     py_run!(
-//         py,
-//         child_module,
-//         "import sys; sys.modules['yapb.progress'] = child_module"
-//     );
-//     parent_module.add_submodule(child_module)?;
-//     Ok(())
-// }
 
 fn replace_nth_char_ascii(s: &mut str, idx: usize, newchar: char) {
     let s_bytes: &mut [u8] = unsafe { s.as_bytes_mut() };

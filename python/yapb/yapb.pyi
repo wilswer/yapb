@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 
 class ProgressBar:
     """Progress bar class."""
@@ -8,11 +8,13 @@ class ProgressBar:
         capacity: int,
         message: str = "",
         description: str = "",
-        ncols: Optional[int] = 50,
+        ncols: int | None = 50,
     ) -> None:
         """Initialize the progress bar."""
         ...
-    def update(self, message: Optional[str], description: Optional[str]) -> None:
+    def update(
+        self, message: str | None = None, description: str | None = None
+    ) -> None:
         """Update the progress bar."""
         ...
     def render(self) -> None:
