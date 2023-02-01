@@ -21,7 +21,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["black", "bumpver", "mypy", "ruff"]
+dev = ["black", "bumpver", "mypy", "ruff", "pytest", "pre-commit"]
 
 [project.urls]
 repository = "https://github.com/wilswer/yapb"
