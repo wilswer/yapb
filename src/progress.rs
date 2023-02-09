@@ -140,7 +140,7 @@ impl ProgressBar {
             io::stdout().flush().unwrap();
         } else {
             println!(
-                "\r{}",
+                "\r{}\n",
                 format_bar_push(
                     &self.message,
                     &self.bar,
